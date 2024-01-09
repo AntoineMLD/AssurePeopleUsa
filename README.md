@@ -21,11 +21,11 @@ Région résidentielle aux États-Unis
 Charges (prime d'assurance)
 
 # Fichiers du Projet
-app.py : Application Streamlit pour la démonstration de la modélisation.
-nettoyage.ipynb : Nettoyage et préparation des données.
-modelisation.ipynb : Construction et évaluation des modèles de machine learning.
-data.csv : Jeu de données utilisé.
-analyse.ipynb : Analyse exploratoire des données.
+**app.py** : Application Streamlit pour la démonstration de la modélisation.
+**nettoyage.ipynb** : Nettoyage et préparation des données.
+**modelisation.ipynb** : Construction et évaluation des modèles de machine learning.
+**data.csv** : Jeu de données utilisé.
+**analyse.ipynb** : Analyse exploratoire des données.
 
 # Installation
 Suivez ces étapes pour configurer le projet :
@@ -33,13 +33,13 @@ Clonez le dépôt.
 Exécutez app.py pour lancer l'application Streamlit.
 
 # Utilisation
-# Analyse de Données :
+**Analyse de Données** :
 Lancez analyse.ipynb pour visualiser l'analyse exploratoire des données.
-# Modélisation :
+**Modélisation** :
 Utilisez modelisation.ipynb pour voir les modèles de machine learning et leurs performances.
-# Application Streamlit : 
+**Application Streamlit** : 
 Lancez app.py pour utiliser l'application de prédiction des primes.
-# Approche et Méthodologies
+**Approche et Méthodologies**
 Analyse univariée et bivariée, tests statistiques.
 Modélisation avec régression linéaire, Lasso, Ridge, et ElasticNet.
 Utilisation de pipelines, PolynomialFeatures, et sélection d'hyperparamètres.
