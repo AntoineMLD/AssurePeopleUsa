@@ -1,24 +1,21 @@
-# AssurePeopleUsa
-Projet de la formation Simplon: Prédire une prime d’assurance grâce à l’IA
-
 # Titre du Projet : Estimation de Primes d'Assurance avec IA
 # Contexte du Projet
-Lancée récemment, notre société de conseil en data et IA a été sélectionnée pour participer à un appel d'offres d'Assur’aimant, un assureur français s’implantant aux États-Unis. Notre mission est de développer une solution IA permettant d'estimer les primes d'assurance pour le marché américain, en remplacement des méthodes traditionnelles longues et coûteuses basées sur des ratios et l'expérience des courtiers.
+Lancée récemment, notre société de conseil en data et IA a été sélectionnée pour participer à un appel d'offres d'Assur’aimant, un assureur français s’implantant aux États-Unis.<br> Notre mission est de développer une solution IA permettant d'estimer les primes d'assurance pour le marché américain, en remplacement des méthodes traditionnelles longues et coûteuses basées sur des ratios et l'expérience des courtiers.
 
 # Objectifs
-Analyse Exploratoire des Données : Comprendre le profil des clients d'Assur’aimant à travers diverses analyses statistiques et visuelles.
-Modélisation Machine Learning : Développer un modèle prédictif pour estimer les primes d'assurance en fonction des données démographiques des clients.
+Analyse Exploratoire des Données : Comprendre le profil des clients d'Assur’aimant à travers diverses analyses statistiques et visuelles.<br>
+Modélisation Machine Learning : Développer un modèle prédictif pour estimer les primes d'assurance en fonction des données démographiques des clients.<br>
 
 # Données
-Le jeu de données comprend :
+Le jeu de données comprend :<br>
 
-Indice de masse corporelle (BMI)
-Sexe
-Âge
-Nombre d'enfants à charge
-Statut de fumeur
-Région résidentielle aux États-Unis
-Charges (prime d'assurance)
+Indice de masse corporelle (BMI)<br>
+Sexe<br>
+Âge<br>
+Nombre d'enfants à charge<br>
+Statut de fumeur<br>
+Région résidentielle aux États-Unis<br>
+Charges (prime d'assurance)<br>
 
 # Fichiers du Projet
 **app.py** : Application Streamlit pour la démonstration de la modélisation. <br>
