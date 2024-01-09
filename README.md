@@ -28,9 +28,9 @@ Charges (prime d'assurance)
 **analyse.ipynb** : Analyse exploratoire des données.
 
 # Installation
-Suivez ces étapes pour configurer le projet :
-Clonez le dépôt.
-Exécutez app.py pour lancer l'application Streamlit.
+Suivez ces étapes pour configurer le projet :<br>
+Clonez le dépôt.<br>
+Exécutez app.py pour lancer l'application Streamlit.<br>
 
 # Utilisation
 **Analyse de Données** :
@@ -40,18 +40,18 @@ Utilisez modelisation.ipynb pour voir les modèles de machine learning et leurs 
 **Application Streamlit** : 
 Lancez app.py pour utiliser l'application de prédiction des primes.
 **Approche et Méthodologies**
-Analyse univariée et bivariée, tests statistiques.
-Modélisation avec régression linéaire, Lasso, Ridge, et ElasticNet.
-Utilisation de pipelines, PolynomialFeatures, et sélection d'hyperparamètres.
-Interprétation des résultats et importance des variables.
+Analyse univariée et bivariée, tests statistiques.<br>
+Modélisation avec régression linéaire, Lasso, Ridge, et ElasticNet.<br>
+Utilisation de pipelines, PolynomialFeatures, et sélection d'hyperparamètres.<br>
+Interprétation des résultats et importance des variables.<br>
 
 
 # Dépendances
-installation des bibliothèques:
-Créer un environnement python:
-python3 -m venv venv
-source venv/bin/activate
-Requirement.text via la commande "pip -r requirements.txt"
-pour lancer streamlite il faut éxécute lance la commande "streamlit run app.py"
+installation des bibliothèques:<br>
+Créer un environnement python:<br>
+python3 -m venv venv<br>
+source venv/bin/activate<br>
+Requirement.text via la commande "pip -r requirements.txt"<br>
+pour lancer streamlite il faut éxécute lance la commande "streamlit run app.py"<br>
 
 
