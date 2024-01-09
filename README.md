@@ -21,10 +21,10 @@ Région résidentielle aux États-Unis
 Charges (prime d'assurance)
 
 # Fichiers du Projet
-**app.py** : Application Streamlit pour la démonstration de la modélisation.
-**nettoyage.ipynb** : Nettoyage et préparation des données.
-**modelisation.ipynb** : Construction et évaluation des modèles de machine learning.
-**data.csv** : Jeu de données utilisé.
+**app.py** : Application Streamlit pour la démonstration de la modélisation. <br>
+**nettoyage.ipynb** : Nettoyage et préparation des données.<br>
+**modelisation.ipynb** : Construction et évaluation des modèles de machine learning.<br>
+**data.csv** : Jeu de données utilisé.<br>
 **analyse.ipynb** : Analyse exploratoire des données.
 
 # Installation
