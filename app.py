@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, PolynomialFeatures
@@ -87,3 +89,5 @@ st.write(f"Taux de prédibilité : {r2_percentage:.2f}%")
 # Arrondir et afficher la prédiction à deux chiffres après la virgule
 rounded_prediction = round(y_pred_input[0], 2)
 st.write(f"<span style='font-size:24px'>Estimation des charges d\'assurance :</span> <span style='color:red;font-size:24px'>{rounded_prediction:.2f}</span><span style='font-size:24px'> $</span>", unsafe_allow_html=True)
+
+
