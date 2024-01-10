@@ -1,63 +1,172 @@
-import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, PolynomialFeatures
+from sklearn.linear_model import LinearRegression, Lasso, ElasticNet
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
-
-# Charger les données depuis le fichier CSV
 file_path = 'data.csv'
+
 data = pd.read_csv(file_path)
 
-# Remplacer les valeurs catégoriques par des valeurs numériques
-data["sex"].replace(['male', 'female'], [0, 1], inplace=True)
-data["smoker"].replace(['no', 'yes'], [0, 1], inplace=True)
 
-# Créer une copie des données sans la colonne 'region' pour la modélisation
-data_model = data.drop("region", axis=1)
+# Vérification des informations manquantes et des doublons
+missing_data = data.isnull().sum()
+duplicates = data.duplicated().sum()
+data = data.drop_duplicates()
 
-# Supprimer les lignes avec des valeurs manquantes
-data_model.dropna(axis=0, inplace=True)
+# Afficher le DataFrame avec les nouvelles colonnes binaires
+print(data.head())
 
-# Diviser les données en features (X) et la cible (y)
-X = data_model.drop('charges', axis=1)
-y = data_model['charges']
+data.dropna(axis=0, inplace=True)
 
-# Diviser les données en ensembles d'entraînement et de test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Initialiser le modèle de régression linéaire
-model = LinearRegression()
+X = data.drop('charges', axis=1)
+y = data['charges']
 
-# Entraîner le modèle
-model.fit(X_train, y_train)
+#Crée une colone de smoker en fonction du BMI
+X['smoker_binary'] = (X['smoker'] == 'yes').astype(int)
 
-# Faire des prédictions sur l'ensemble de test
-y_pred = model.predict(X_test)
+#Création des intervalles pour les catégories BMI
+bins = [0, 18.5, 24.9, 29.9, 34.9, 39.9, float('inf')]  # Les limites des catégories
 
-# Évaluation du modèle
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
+#Étiquettes pour les catégories BMI
+labels = [
+    'underweight', 'normal weight', 'overweight',
+    'obesity class I', 'obesity class II', 'obesity class III'
+]
 
-st.title('Analyse des données')
+#Utilisation de pd.cut pour créer de nouvelles colonnes basées sur les catégories BMI
+X['BMI_category'] = pd.cut(X['bmi'], bins=bins, labels=labels, right=False)
 
-# Afficher les métriques d'évaluation
-st.write(f"Coût (MSE): {mse}")
-st.write(f"R-squared: {r2}")
+#Utilisation de pd.get_dummies pour obtenir des colonnes binaires pour chaque catégorie
+BMI_dummies = pd.get_dummies(X['BMI_category'])
 
-# Ajouter la colonne 'region' pour colorer les points dans les graphiques
-data['color'] = data['region'].map({'northeast': 'green', 'southeast': 'blue', 'southwest': 'red', 'northwest': 'orange'})
+#Ajout des colonnes binaires au DataFrame X
+X = pd.concat([X, BMI_dummies], axis=1)
 
-# Obtenir les noms des colonnes de X
-feature_names = X.columns
+X['bmi_smoker'] = X['bmi'] * X['smoker_binary']
+X = X.drop('smoker_binary', axis=1)
 
-# Créer des nuages de points pour chaque colonne de X par rapport à y avec couleurs par région
-for feature in feature_names:
-    fig, ax = plt.subplots(figsize=(6, 4))
-    for region, color in data.groupby('region')['color']:
-        ax.scatter(data[data['region'] == region][feature], data[data['region'] == region]['charges'], label=region, color=color, alpha=0.5)
-    ax.set_title(f'{feature} vs Charges')
-    ax.set_xlabel(feature)
-    ax.set_ylabel('Charges')
-    ax.legend()
-    st.pyplot(fig)
+#Suppression de la colonne 'BMI_category' car elle n'est plus nécessaire
+X = X.drop('BMI_category', axis=1)
+
+#Affichage du DataFrame avec les nouvelles colonnes binaires pour les catégories BMI
+print(X)
+X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, train_size=0.85, random_state=42, stratify=X['smoker'])
+# 80% pour train et 20% de test
+
+print("Train set X", X_train.shape)
+print("Train set Y", y_train.shape)
+print("Test set X", X_test.shape)
+print("Test set Y", y_test.shape)
+
+
+# Identifier les colonnes catégories et numériques
+numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns
+categorical_cols = X.select_dtypes(include=['object']).columns
+
+
+# Créer le pipeline pour les features numériques
+numerical_pipeline = Pipeline([
+    ('poly', PolynomialFeatures(2)),
+    ('scaler', StandardScaler()) # Ajout de PolynomialFeatures
+])
+
+
+# Créer le pipeline pour les features catégorielles
+categorial_pipeline = Pipeline([
+    ('encoder', OneHotEncoder()),
+    ('poly', PolynomialFeatures(2))
+])
+
+
+# Combine les pipelines en utilisant ColumnTransformer
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('numerical', numerical_pipeline, numerical_cols),
+        ('categorial', categorial_pipeline, categorical_cols)
+    ])
+
+
+
+
+# Créer le pipeline final en ajoutant le model
+
+LR_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('regression', LinearRegression())
+])
+
+# Lasso_pipeline = Pipeline([
+#     ('preprocessor', preprocessor),
+#     ('Lasso', Lasso())
+# ])
+
+# ElasticNet_pipeline = Pipeline([
+#     ('prepocessor', preprocessor),
+#     ('ElasticNet', ElasticNet())
+# ])
+
+print (len(X_train))
+print (len(y_train))
+
+# On entraine les donnnées
+LR_pipeline.fit(X_train, y_train)
+# Lasso_pipeline.fit(X_train, y_train)
+# ElasticNet_pipeline.fit(X_train, y_train)
+
+# On predicte Linear Regression
+y_pred_LR = LR_pipeline.predict(X_test)
+
+# Calcul du score R2 sur les données d'entraînement
+y_pred_LR = LR_pipeline.predict(X_test)
+r2 = r2_score(y_test, y_pred_LR)
+
+# Interface utilisateur Streamlit pour la prédiction
+st.sidebar.header('Entrez les informations pour estimer les charges d\'assurance')
+
+# Champs de saisie pour les caractéristiques
+age = st.sidebar.number_input('Âge', min_value=0, max_value=100, value=30)
+sex = st.sidebar.radio('Sexe', ['male', 'female'])
+bmi = st.sidebar.number_input('Indice de masse corporelle (BMI)', min_value=10.0, max_value=50.0, value=25.0)
+children = st.sidebar.number_input('Nombre d\'enfants', min_value=0, max_value=10, value=0)
+smoker = st.sidebar.radio('Fumeur', ['yes', 'no'])
+region = st.sidebar.selectbox('Région', ['southwest', 'southeast', 'northwest', 'northeast'])
+
+# Préparation des données pour la prédiction
+input_data = pd.DataFrame({'age': [age], 'sex': [sex], 'bmi': [bmi], 'children': [children],
+                           'smoker': [smoker], 'region': [region]})
+
+# Création de la colonne binaire pour le fumeur
+input_data['smoker_binary'] = (input_data['smoker'] == 'yes').astype(int)
+input_data.drop('smoker', axis=1, inplace=True)
+
+# Création des catégories BMI et de leurs colonnes binaires correspondantes
+bins = [0, 18.5, 24.9, 29.9, 34.9, 39.9, float('inf')]
+labels = ['underweight', 'normal weight', 'overweight', 'obesity class I', 'obesity class II', 'obesity class III']
+input_data['BMI_category'] = pd.cut(input_data['bmi'], bins=bins, labels=labels, right=False)
+BMI_dummies = pd.get_dummies(input_data['BMI_category'])
+input_data = pd.concat([input_data, BMI_dummies], axis=1)
+input_data['bmi_smoker'] = input_data['bmi'] * input_data['smoker_binary']
+input_data.drop(['bmi', 'BMI_category'], axis=1, inplace=True)
+
+
+
+
+# Préparation des données pour la prédiction
+input_data = pd.DataFrame({'age': [age], 'sex': [sex], 'bmi': [bmi], 'children': [children],
+                           'smoker': [smoker], 'region': [region]})
+
+# Prédiction des charges d'assurance
+predicted_charge = LR_pipeline.predict(input_data)
+
+# Affichage de la prédiction
+st.subheader('Estimation des charges d\'assurance')
+st.write(f"Estimation des charges d\'assurance : {predicted_charge[0]}")
+
+# Affichage du score R2 sur les données d'entraînement
+st.subheader('Score R2 sur les données d\'entraînement')
+st.write(f"Score R2 : {r2}")
