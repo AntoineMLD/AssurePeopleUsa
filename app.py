@@ -7,102 +7,13 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler, PolynomialFeatu
 from sklearn.linear_model import LinearRegression, Lasso, ElasticNet
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
-
-def cleaner(table):
-    #Crée une colone de smoker en fonction du BMI
-    table['smoker_binary'] = (table['smoker'] == 'yes').astype(int)
-
-    #Création des intervalles pour les catégories BMI
-    bins = [0, 18.5, 24.9, 29.9, 34.9, 39.9, float('inf')]  # Les limites des catégories
-
-    #Étiquettes pour les catégories BMI
-    labels = [
-        'underweight', 'normal weight', 'overweight',
-        'obesity class I', 'obesity class II', 'obesity class III'
-        ]
-
-    #Utilisation de pd.cut pour créer de nouvelles colonnes basées sur les catégories BMI
-    table['BMI_category'] = pd.cut(table['bmi'], bins=bins, labels=labels, right=False)
-
-    #Utilisation de pd.get_dummies pour obtenir des colonnes binaires pour chaque catégorie
-    BMI_dummies = pd.get_dummies(table['BMI_category'])
-
-    #Ajout des colonnes binaires au DataFrame X
-    table = pd.concat([table, BMI_dummies], axis=1)
-
-    table['bmi_smoker'] = table['bmi'] * table['smoker_binary']
-    table = table.drop('smoker_binary', axis=1)
-
-    #Suppression de la colonne 'BMI_category' car elle n'est plus nécessaire
-    table = table.drop('BMI_category', axis=1)
-    return(table)
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import LabelEncoder
+import pickle
 
 
-def training (X, y):
-    # Identifier les colonnes catégories et numériques
-    numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns
-    categorical_cols = X.select_dtypes(include=['object']).columns
-
-    # Créer le pipeline pour les features numériques
-    numerical_pipeline = Pipeline([
-        ('poly', PolynomialFeatures(2)),
-        ('scaler', StandardScaler()) # Ajout de PolynomialFeatures
-    ])
-
-    # Créer le pipeline pour les features catégorielles
-    categorial_pipeline = Pipeline([
-        ('encoder', OneHotEncoder()),
-        ('poly', PolynomialFeatures(2))
-    ])
-
-    # Combine les pipelines en utilisant ColumnTransformer
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('numerical', numerical_pipeline, numerical_cols),
-            ('categorial', categorial_pipeline, categorical_cols)
-        ])
-
-    LR_pipeline = Pipeline(steps=[
-        ('preprocessor', preprocessor),
-        ('regression', LinearRegression())
-    ])
-    return(LR_pipeline)
-
-
-file_path = 'data_original.csv'
-
-data = pd.read_csv(file_path)
-
-
-# Vérification des informations manquantes et des doublons
-missing_data = data.isnull().sum()
-duplicates = data.duplicated().sum()
-data = data.drop_duplicates()
-data.dropna(axis=0, inplace=True)
-
-
-
-X = data.drop('charges', axis=1)
-y = data['charges']
-
-X = cleaner(X)
-
-
-#Affichage du DataFrame avec les nouvelles colonnes binaires pour les catégories BMI
-# 80% pour train et 20% de test
-X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, train_size=0.85, random_state=42, stratify=X['smoker'])
-
-LR_pipeline = training(X, y)
-
-# On entraine les donnnées
-LR_pipeline.fit(X_train, y_train)
-
-# On predicte Linear Regression
-y_pred_LR = LR_pipeline.predict(X_test)
-
-# Calcul du score R2 sur les données d'entraînement
-y_pred_LR = LR_pipeline.predict(X_test)
-r2 = r2_score(y_test, y_pred_LR)
+with open('exportModel.pkl', 'rb') as file:
+    model = pickle.load(file)
 
 # Interface utilisateur Streamlit pour la prédiction
 st.sidebar.header('Entrez les informations pour estimer les charges d\'assurance')
@@ -118,21 +29,56 @@ region = st.sidebar.selectbox('Région', ['southwest', 'southeast', 'northwest',
 input_data = pd.DataFrame({'age': [age], 'sex': [sex], 'bmi': [bmi], 'children': [children],
                            'smoker': [smoker], 'region': [region]})
 
-input_data = cleaner(input_data)
+# input_data = cleanerInput(input_data)
+    #Crée une colone de smoker en fonction du BMI
+input_data['smoker_binary'] = (input_data['smoker'] == 'yes').astype(int)
 
+label_encoder = LabelEncoder()
+columns_to_encode = ['sex', 'smoker']
+for column in columns_to_encode:
+    input_data[column] = label_encoder.fit_transform(input_data[column])  # Encodage des colonnes
 
-# X_test.columns
-# input_data.columns
+# Créer des variables binaires avec des noms explicites pour la colonne 'region'
+# region_dummies_named = pd.get_dummies(input_data['region'], prefix='is', prefix_sep='_')
 
-y_pred_input = LR_pipeline.predict(input_data)
-# # Affichage de la prédiction
-# st.subheader('Estimation des charges d\'assurance')
-# st.write(f"Estimation des charges d\'assurance : {y_pred_input[0]}")
+region_dummies_named = pd.get_dummies(input_data['region'], prefix='is', prefix_sep='_')
+# Colonnes à conserver dans le DataFrame final
+desired_columns = ['is_northeast', 'is_northwest', 'is_southeast', 'is_southwest']
+# Ajouter les colonnes manquantes avec des valeurs par défaut de 0
+for col in desired_columns:
+    if col not in region_dummies_named.columns:
+        region_dummies_named[col] = 0
+# Concaténer ces variables binaires avec le DataFrame original
+input_data = pd.concat([input_data, region_dummies_named[desired_columns]], axis=1)
 
-# # Affichage du score R2 sur les données d'entraînement
-# st.subheader('Score R2 sur les données d\'entraînement')
-# st.write(f"Score R2 : {r2}")
+#Création des intervalles pour les catégories BMI
+bins = [0, 18.5, 24.9, 29.9, 34.9, 39.9, float('inf')]  # Les limites des catégories
 
+#Étiquettes pour les catégories BMI
+labels = [
+    'underweight', 'normal weight', 'overweight',
+    'obesity class I', 'obesity class II', 'obesity class III'
+    ]
+
+#Utilisation de pd.cut pour créer de nouvelles colonnes basées sur les catégories BMI
+input_data['BMI_category'] = pd.cut(input_data['bmi'], bins=bins, labels=labels, right=False)
+
+#Utilisation de pd.get_dummies pour obtenir des colonnes binaires pour chaque catégorie
+BMI_dummies = pd.get_dummies(input_data['BMI_category'])
+
+#Ajout des colonnes binaires au DataFrame X
+input_data = pd.concat([input_data, BMI_dummies], axis=1)
+
+input_data['bmi_smoker'] = input_data['bmi'] * input_data['smoker_binary']
+input_data = input_data.drop('smoker_binary', axis=1)
+
+#Suppression de la colonne 'BMI_category' car elle n'est plus nécessaire
+input_data = input_data.drop('BMI_category', axis=1)
+
+y_pred_input = model.predict(input_data)
+
+with open('exportR2.pkl', 'rb') as file:
+    r2 = pickle.load(file)
 
 # Affichage du score R2 en pourcentage
 r2_percentage = r2 * 100
