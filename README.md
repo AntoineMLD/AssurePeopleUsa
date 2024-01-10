@@ -36,7 +36,7 @@ Lancez analyse.ipynb pour visualiser l'analyse exploratoire des données.
 Utilisez modelisation.ipynb pour voir les modèles de machine learning et leurs performances.
 **Application Streamlit** : 
 Lancez app.py pour utiliser l'application de prédiction des primes.<br>
-lien de l'application en ligne : https://assurepeopleusaproject.streamlit.app/<br>
+lien de l'application en ligne : <br>
 **Approche et Méthodologies**
 Analyse univariée et bivariée, tests statistiques.<br>
 Modélisation avec régression linéaire, Lasso, Ridge, et ElasticNet.<br>
