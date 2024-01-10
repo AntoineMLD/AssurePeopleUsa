@@ -38,7 +38,7 @@ def cleaner(table):
     return(table)
 
 
-file_path = 'data.csv'
+file_path = 'data_original.csv'
 
 data = pd.read_csv(file_path)
 
