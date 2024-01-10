@@ -38,6 +38,37 @@ def cleaner(table):
     return(table)
 
 
+def training (X, y):
+    # Identifier les colonnes catégories et numériques
+    numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns
+    categorical_cols = X.select_dtypes(include=['object']).columns
+
+    # Créer le pipeline pour les features numériques
+    numerical_pipeline = Pipeline([
+        ('poly', PolynomialFeatures(2)),
+        ('scaler', StandardScaler()) # Ajout de PolynomialFeatures
+    ])
+
+    # Créer le pipeline pour les features catégorielles
+    categorial_pipeline = Pipeline([
+        ('encoder', OneHotEncoder()),
+        ('poly', PolynomialFeatures(2))
+    ])
+
+    # Combine les pipelines en utilisant ColumnTransformer
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('numerical', numerical_pipeline, numerical_cols),
+            ('categorial', categorial_pipeline, categorical_cols)
+        ])
+
+    LR_pipeline = Pipeline(steps=[
+        ('preprocessor', preprocessor),
+        ('regression', LinearRegression())
+    ])
+    return(LR_pipeline)
+
+
 file_path = 'data_original.csv'
 
 data = pd.read_csv(file_path)
@@ -56,46 +87,12 @@ y = data['charges']
 
 X = cleaner(X)
 
+
 #Affichage du DataFrame avec les nouvelles colonnes binaires pour les catégories BMI
 # 80% pour train et 20% de test
 X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, train_size=0.85, random_state=42, stratify=X['smoker'])
 
-
-
-# Identifier les colonnes catégories et numériques
-numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns
-categorical_cols = X.select_dtypes(include=['object']).columns
-
-# Créer le pipeline pour les features numériques
-numerical_pipeline = Pipeline([
-    ('poly', PolynomialFeatures(2)),
-    ('scaler', StandardScaler()) # Ajout de PolynomialFeatures
-])
-
-
-# Créer le pipeline pour les features catégorielles
-categorial_pipeline = Pipeline([
-    ('encoder', OneHotEncoder()),
-    ('poly', PolynomialFeatures(2))
-])
-
-
-# Combine les pipelines en utilisant ColumnTransformer
-preprocessor = ColumnTransformer(
-    transformers=[
-        ('numerical', numerical_pipeline, numerical_cols),
-        ('categorial', categorial_pipeline, categorical_cols)
-    ])
-
-
-LR_pipeline = Pipeline(steps=[
-    ('preprocessor', preprocessor),
-    ('regression', LinearRegression())
-])
-
-
-
-
+LR_pipeline = training(X, y)
 
 # On entraine les donnnées
 LR_pipeline.fit(X_train, y_train)
@@ -128,10 +125,19 @@ input_data = cleaner(input_data)
 # input_data.columns
 
 y_pred_input = LR_pipeline.predict(input_data)
-# Affichage de la prédiction
-st.subheader('Estimation des charges d\'assurance')
-st.write(f"Estimation des charges d\'assurance : {y_pred_input[0]}")
+# # Affichage de la prédiction
+# st.subheader('Estimation des charges d\'assurance')
+# st.write(f"Estimation des charges d\'assurance : {y_pred_input[0]}")
 
-# Affichage du score R2 sur les données d'entraînement
-st.subheader('Score R2 sur les données d\'entraînement')
-st.write(f"Score R2 : {r2}")
+# # Affichage du score R2 sur les données d'entraînement
+# st.subheader('Score R2 sur les données d\'entraînement')
+# st.write(f"Score R2 : {r2}")
+
+
+# Affichage du score R2 en pourcentage
+r2_percentage = r2 * 100
+st.write(f"Taux de prédibilité : {r2_percentage:.2f}%")
+
+# Arrondir et afficher la prédiction à deux chiffres après la virgule
+rounded_prediction = round(y_pred_input[0], 2)
+st.write(f"<span style='font-size:24px'>Estimation des charges d\'assurance :</span> <span style='color:red;font-size:24px'>{rounded_prediction:.2f}</span><span style='font-size:24px'> $</span>", unsafe_allow_html=True)
