@@ -12,7 +12,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 import pickle
-
+from preprocess_data import preprocess_data
 
 with open('exportModel.pkl', 'rb') as file:
     model = pickle.load(file)
@@ -31,57 +31,14 @@ region = st.sidebar.selectbox('Région', ['southwest', 'southeast', 'northwest',
 input_data = pd.DataFrame({'age': [age], 'sex': [sex], 'bmi': [bmi], 'children': [children],
                            'smoker': [smoker], 'region': [region]})
 
-# input_data = cleanerInput(input_data)
-    #Crée une colone de smoker en fonction du BMI
-input_data['smoker_binary'] = (input_data['smoker'] == 'yes').astype(int)
 
-label_encoder = LabelEncoder()
-columns_to_encode = ['sex', 'smoker']
-for column in columns_to_encode:
-    input_data[column] = label_encoder.fit_transform(input_data[column])  # Encodage des colonnes
 
-# Créer des variables binaires avec des noms explicites pour la colonne 'region'
-# region_dummies_named = pd.get_dummies(input_data['region'], prefix='is', prefix_sep='_')
 
-region_dummies_named = pd.get_dummies(input_data['region'], prefix='is', prefix_sep='_')
-# Colonnes à conserver dans le DataFrame final
-desired_columns = ['is_northeast', 'is_northwest', 'is_southeast', 'is_southwest']
-# Ajouter les colonnes manquantes avec des valeurs par défaut de 0
-for col in desired_columns:
-    if col not in region_dummies_named.columns:
-        region_dummies_named[col] = 0
-# Concaténer ces variables binaires avec le DataFrame original
-input_data = pd.concat([input_data, region_dummies_named[desired_columns]], axis=1)
-
-#Création des intervalles pour les catégories BMI
-bins = [0, 18.5, 24.9, 29.9, 34.9, 39.9, float('inf')]  # Les limites des catégories
-
-#Étiquettes pour les catégories BMI
-labels = [
-    'underweight', 'normal weight', 'overweight',
-    'obesity class I', 'obesity class II', 'obesity class III'
-    ]
-
-#Utilisation de pd.cut pour créer de nouvelles colonnes basées sur les catégories BMI
-input_data['BMI_category'] = pd.cut(input_data['bmi'], bins=bins, labels=labels, right=False)
-
-#Utilisation de pd.get_dummies pour obtenir des colonnes binaires pour chaque catégorie
-BMI_dummies = pd.get_dummies(input_data['BMI_category'])
-
-#Ajout des colonnes binaires au DataFrame X
-input_data = pd.concat([input_data, BMI_dummies], axis=1)
-
-input_data['bmi_smoker'] = input_data['bmi'] * input_data['smoker_binary']
-input_data = input_data.drop('smoker_binary', axis=1)
-
-#Suppression de la colonne 'BMI_category' car elle n'est plus nécessaire
-input_data = input_data.drop('BMI_category', axis=1)
-
+st.write(input_data)
 y_pred_input = model.predict(input_data)
 
 with open('exportR2.pkl', 'rb') as file:
     r2 = pickle.load(file)
-
 # Affichage du score R2 en pourcentage
 r2_percentage = r2 * 100
 st.write(f"Taux de prédibilité : {r2_percentage:.2f}%")
