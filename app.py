@@ -12,7 +12,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 import pickle
-from preprocess_data import preprocess_data
+from preprocess_data import split_regions, categorize_bmi
 
 with open('exportModel.pkl', 'rb') as file:
     model = pickle.load(file)
@@ -28,13 +28,13 @@ children = st.sidebar.number_input('Nombre d\'enfants', min_value=0, max_value=5
 smoker = st.sidebar.radio('Fumeur', ['yes', 'no'])
 region = st.sidebar.selectbox('Région', ['southwest', 'southeast', 'northwest', 'northeast'])
 # Préparation des données pour la prédiction
+
+
+
 input_data = pd.DataFrame({'age': [age], 'sex': [sex], 'bmi': [bmi], 'children': [children],
                            'smoker': [smoker], 'region': [region]})
 
 
-
-
-st.write(input_data)
 y_pred_input = model.predict(input_data)
 
 with open('exportR2.pkl', 'rb') as file:

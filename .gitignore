@@ -2,3 +2,6 @@ venv
 env/lib/python3.7/site-packages/debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_evaluator.pyx
 env/lib/python3.7/site-packages/debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_evaluator.cp39-win_amd64.pyd
 env
+exportModel.pkl
+exportR2.pkl
+data_cleaned.csv
