@@ -1,11 +1,5 @@
 import pandas as pd
 
-# Ajout de la méthode split_regions
-def split_regions(df):
-    for region in ['east', 'west', 'north', 'south']:
-        df['is_' + region] = (df['region'] == region).astype(int)
-    return df.drop('region', axis=1)
-
 # Ajout de la méthode categorize_bmi
 def categorize_bmi(df):
     df['bmi_category'] = pd.cut(df['bmi'], 
