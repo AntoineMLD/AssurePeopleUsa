@@ -12,7 +12,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 import pickle
-from preprocess_data import split_regions, categorize_bmi
+from preprocess_data import categorize_bmi
 
 with open('exportModel.pkl', 'rb') as file:
     model = pickle.load(file)
