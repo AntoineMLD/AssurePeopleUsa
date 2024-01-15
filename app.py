@@ -12,7 +12,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 import pickle
-from preprocess_data import categorize_bmi
+from preprocess_data import categorize_bmi_and_interaction
 
 with open('exportModel.pkl', 'rb') as file:
     model = pickle.load(file)
@@ -40,8 +40,8 @@ y_pred_input = model.predict(input_data)
 with open('exportR2.pkl', 'rb') as file:
     r2 = pickle.load(file)
 # Affichage du score R2 en pourcentage
-r2_percentage = r2 * 100
-st.write(f"Taux de prédibilité : {r2_percentage:.2f}%")
+r2_percentage = r2
+st.write(f"R2 : {r2_percentage:.3f}")
 
 # Arrondir et afficher la prédiction à deux chiffres après la virgule
 rounded_prediction = round(y_pred_input[0], 2)
