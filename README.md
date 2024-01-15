@@ -51,5 +51,6 @@ python3 -m venv venv<br>
 source venv/bin/activate<br>
 Requirement.text via la commande "pip -r requirements.txt"<br>
 pour lancer streamlite il faut éxécute lance la commande "streamlit run app.py"<br>
+lien de notre présentation : https://www.canva.com/design/DAF53kEs7GE/pWiLJYcQm7uhIBXb2MeKZQ/edit?utm_content=DAF53kEs7GE&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 
